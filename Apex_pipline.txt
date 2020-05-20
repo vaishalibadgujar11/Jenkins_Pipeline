@@ -6,7 +6,11 @@ pipeline {
         stage('Apex Installation') {
             steps {
                 // Set the required Apex Version 
-               contentReplace(configs: [fileContentReplaceConfig(configs: [fileContentReplaceItemConfig(matchCount: 0, replace: 'set _apex_version=Apex_6.999.999', search: 'set _apex_version=Apex_X.XXX.XXX'), fileContentReplaceItemConfig(matchCount: 0, replace: 'set _apex_version_dir=Apex 6.999', search: 'set _apex_version_dir=Apex X.XXX')], fileEncoding: 'UTF-8', filePath: 'C:\\JenkinsMaster\\Apex6\\InstallApex6\\InstallApex.cmd'), fileContentReplaceConfig(configs: [fileContentReplaceItemConfig(matchCount: 0, replace: 'APEX_VERSION_MI=999', search: 'APEX_VERSION_MI=XXX')], fileEncoding: 'UTF-8', filePath: 'C:\\JenkinsMaster\\Apex6\\InstallApex6\\ArchiveAdjustments\\ApexInstallation\\scripts\\Environment_APEXDB.txt')])
+               contentReplace(configs: 
+               [fileContentReplaceConfig(configs:
+               [fileContentReplaceItemConfig(matchCount: 0, replace: 'set _apex_version=Apex_6.999.999',
+               search: 'set _apex_version=Apex_X.XXX.XXX'), 
+               fileContentReplaceItemConfig(matchCount: 0, replace: 'set _apex_version_dir=Apex 6.999', search: 'set _apex_version_dir=Apex X.XXX')], fileEncoding: 'UTF-8', filePath: 'C:\\JenkinsMaster\\Apex6\\InstallApex6\\InstallApex.cmd'), fileContentReplaceConfig(configs: [fileContentReplaceItemConfig(matchCount: 0, replace: 'APEX_VERSION_MI=999', search: 'APEX_VERSION_MI=XXX')], fileEncoding: 'UTF-8', filePath: 'C:\\JenkinsMaster\\Apex6\\InstallApex6\\ArchiveAdjustments\\ApexInstallation\\scripts\\Environment_APEXDB.txt')])
                 
                 //Copy Apex build from the server
                 bat label: '', script: 'python C:\\JenkinsMaster\\Apex6\\JenkinsJobFiles\\Jenkins.py'
