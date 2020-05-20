@@ -1,0 +1,62 @@
+pipeline {
+   agent { label '231_Neptune' }
+   
+   
+    stages {
+        stage('Apex Installation') {
+            steps {
+                // Set the required Apex Version 
+               contentReplace(configs: [fileContentReplaceConfig(configs: [fileContentReplaceItemConfig(matchCount: 0, replace: 'set _apex_version=Apex_6.999.999', search: 'set _apex_version=Apex_X.XXX.XXX'), fileContentReplaceItemConfig(matchCount: 0, replace: 'set _apex_version_dir=Apex 6.999', search: 'set _apex_version_dir=Apex X.XXX')], fileEncoding: 'UTF-8', filePath: 'C:\\JenkinsMaster\\Apex6\\InstallApex6\\InstallApex.cmd'), fileContentReplaceConfig(configs: [fileContentReplaceItemConfig(matchCount: 0, replace: 'APEX_VERSION_MI=999', search: 'APEX_VERSION_MI=XXX')], fileEncoding: 'UTF-8', filePath: 'C:\\JenkinsMaster\\Apex6\\InstallApex6\\ArchiveAdjustments\\ApexInstallation\\scripts\\Environment_APEXDB.txt')])
+                
+                //Copy Apex build from the server
+                bat label: '', script: 'python C:\\JenkinsMaster\\Apex6\\JenkinsJobFiles\\Jenkins.py'
+                
+                // Set the Apex version to X.XXX.XXX
+                contentReplace(configs: [fileContentReplaceConfig(configs: [fileContentReplaceItemConfig(matchCount: 0, replace: 'set _apex_version=Apex_X.XXX.XXX', search: 'set _apex_version=Apex_6.999.999'), fileContentReplaceItemConfig(matchCount: 0, replace: 'set _apex_version_dir=Apex X.XXX', search: 'set _apex_version_dir=Apex 6.999')], fileEncoding: 'UTF-8', filePath: 'C:\\JenkinsMaster\\Apex6\\InstallApex6\\InstallApex.cmd'), fileContentReplaceConfig(configs: [fileContentReplaceItemConfig(matchCount: 0, replace: 'APEX_VERSION_MI=XXX', search: 'APEX_VERSION_MI=999')], fileEncoding: 'UTF-8', filePath: 'C:\\JenkinsMaster\\Apex6\\InstallApex6\\ArchiveAdjustments\\ApexInstallation\\scripts\\Environment_APEXDB.txt')])
+            }
+        }
+        stage('Database Setup') {
+            steps {
+                // SVN update for Testing Schema
+                bat label: '', script: 'python C:\\JenkinsMaster\\Apex6\\JenkinsJobFiles\\SchemaSVNUpdate.py'
+                
+                // Run DB setup script
+                bat label: '', script: 'python C:\\JenkinsMaster\\Apex6\\XMLtoOracle\\XMLtoOracle.py'
+
+                // Generate log file
+                bat label: '', script: 'C:\\JenkinsMaster\\Apex6\\Setup\\setup_pywinauto.bat > batch_log.txt'
+            }
+        }
+
+
+        stage('SVN Update') {
+            steps {
+                // SVN update for Test suite
+                bat label: '', script: 'python C:\\JenkinsMaster\\Apex6\\JenkinsJobFiles\\pywinautoSVN_update.py'
+               
+                // Set Apex version in config.py file and Set value 1 to batch file
+                contentReplace(configs: [fileContentReplaceConfig(configs: [fileContentReplaceItemConfig(matchCount: 0, replace: 'APEX_VER = "6.999"', search: 'APEX_VER = "X.XXX"')], fileEncoding: 'UTF-8', filePath: 'CC:\\JenkinsMaster\\Apex6\\Pywinauto\\resources\\config.py'), fileContentReplaceConfig(configs: [fileContentReplaceItemConfig(matchCount: 0, replace: 'Sanity.txt;1', search: 'Sanity.txt;0')], fileEncoding: 'UTF-8', filePath: 'C:\\JenkinsMaster\\Apex6\\Pywinauto\\test_suites\\python_batches.txt')])
+                
+                // Start Apex services
+                bat label: '', script: 'C:\\JenkinsMaster\\Apex6\\InstallApex6\\StartApex.cmd'
+                
+                // Set max quantity in External System
+                
+                
+            }
+        }
+
+        stage('Batch Execution') {
+            steps {
+                // Kill Apex instance if exists
+                bat label: '', script: 'start cmd.exe /c C:\\JenkinsMaster\\KillApexInstance.bat'
+                
+                //Run batch driver file
+                bat label: '', script: 'C:\\JenkinsMaster\\Apex6\\Pywinauto\\batch_driver.py'
+            }
+        }
+    }
+}
+
+
+ 
